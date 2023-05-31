@@ -16,23 +16,36 @@ import javafx.scene.shape.Circle;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * The BoardGameUIController class is responsible for managing the user interface of the board game.
+ * It handles user input, updates the board state, and displays game-related information.
+ */
 public class BoardGameUIController {
     @FXML
     private GridPane board;
 
     private BoardGame model = new BoardGame();
+
+    /**
+     * Initializes the board game UI.
+     * It adds squares to the board and paints the circles to their correct color.
+     */
     @FXML
     private void initialize() {
         for (var i = 0; i < board.getRowCount(); i++) {
             for (var j = 0; j < board.getColumnCount(); j++) {
-                var square = createSquare(i, j);
+                var square = createSquare();
                 board.add(square, j, i);
             }
         }
-        colorCircles();
+        paintKingCircles();
     }
-    private StackPane createSquare(int i, int j) {
+
+    /**
+     * Creates a StackPane and adds a Circle to it.
+     * @return StackPane
+     */
+    private StackPane createSquare() {
         StackPane square = new StackPane();
         square.getStyleClass().addAll("square", "unvisited");
         Circle circle = createCircle();
@@ -41,12 +54,24 @@ public class BoardGameUIController {
         return square;
     }
 
+    /**
+     * Creates a circle with a size of 40 pixels and the "transparentCircle" CSS class.
+     *
+     * @return the created circle
+     */
     private Circle createCircle() {
         Circle circle = new Circle(40);
         circle.getStyleClass().add("transparentCircle");
         return circle;
     }
 
+    /**
+     * Retrieves the stack pane at the specified position on the board.
+     *
+     * @param position the position of the stack pane on the board
+     * @return the stack pane at the specified position
+     * @throws AssertionError if the stack pane is not found
+     */
     private StackPane getSquare(Position position) {
         for (var child : board.getChildren()) {
             if (GridPane.getRowIndex(child) == position.row() && GridPane.getColumnIndex(child) == position.col()) {
@@ -55,16 +80,28 @@ public class BoardGameUIController {
         }
         throw new AssertionError();
     }
+
+    /**
+     * Retrieves the circle child of a stack pane.
+     *
+     * @param square the stack pane containing the circle
+     * @return the circle object found within the stack pane
+     * @throws AssertionError if a circle is not found within the stack pane
+     */
     private Circle getCircleFromSquare(StackPane square) {
         for (Node child : square.getChildren()) {
             if (child instanceof Circle) {
                 return (Circle) child;
             }
         }
-        // Never happens
         throw new AssertionError("Circle not found in the StackPane.");
     }
-    private void colorCircles(){
+
+    /**
+     * Paints the king circles on the board.
+     * It removes the "transparentCircle" class and adds the "whiteKing" and "blackKing" classes to the corresponding circles.
+     */
+    private void paintKingCircles(){
         Position whitePos = model.getWhiteKing();
         Position blackPos = model.getBlackKing();
         Circle whiteCircle = getCircleFromSquare(getSquare(whitePos));
@@ -76,24 +113,42 @@ public class BoardGameUIController {
         blackCircle.getStyleClass().add("blackKing");
     }
 
+    /**
+     * Handles a mouse click event on a stack pane.
+     * If the step is legal, it removes the previous cell, makes a move, and redraws the king circles.
+     *
+     * @param event the mouse click event
+     */
     @FXML
     private void handleMouseClick(MouseEvent event) {
-        StackPane clickedCell = (StackPane) event.getSource();
-        var row = GridPane.getRowIndex(clickedCell);
-        var col = GridPane.getColumnIndex(clickedCell);
         Position from = model.getCurrentPlayerPosition();
-        Position to = new Position(row, col);
+        Position to = getCellPositionAtMouse(event);
 
         if(model.legalStep(from, to)){
             makeCellRemoved(getSquare(from));
             model.move(to);
-            colorCircles();
+            paintKingCircles();
         }
-        if (gameOver()) {
-            handleGameOver();
-        }
+        if (gameOver()) handleGameOver();
     }
 
+    /**
+     * Retrieves the position of the stack pane based on the mouse click event.
+     *
+     * @param event the mouse click event
+     * @return the position of the stack pane
+     */
+    private Position getCellPositionAtMouse(MouseEvent event){
+        StackPane clickedCell = (StackPane) event.getSource();
+        var row = GridPane.getRowIndex(clickedCell);
+        var col = GridPane.getColumnIndex(clickedCell);
+        return new Position(row, col);
+    }
+
+    /**
+     * Changes to .removed class on the previous StackPane cell. and deletes its circle children.
+     * @param oldCell StackPane of the previous cell.
+     */
     private void makeCellRemoved(StackPane oldCell){
         Circle circle = getCircleFromSquare(oldCell);
 
@@ -101,9 +156,22 @@ public class BoardGameUIController {
         oldCell.getStyleClass().add("removed");
         oldCell.getChildren().remove(circle);
     }
+
+    /**
+     * Checks if the game is over.
+     *
+     * @return {@code true} if the current player has no legal moves, {@code false} otherwise.
+     */
     private boolean gameOver() {
         return !hasLegalMoves(model.getCurrentPlayerPosition());
     }
+
+    /**
+     * Checks if a player has legal moves from the given position.
+     *
+     * @param playerPosition the position of the player
+     * @return {@code true} if the player has legal moves, {@code false} otherwise
+     */
     private boolean hasLegalMoves(Position playerPosition) {
         for (Position position : getAdjacentPositions(playerPosition)) {
             if (model.getCell(position) == Cell.UNVISITED) {
@@ -112,6 +180,12 @@ public class BoardGameUIController {
         }
         return false;
     }
+    /**
+     * Retrieves the adjacent positions of a given position.
+     *
+     * @param position the position
+     * @return a list of adjacent positions
+     */
     private List<Position> getAdjacentPositions(Position position) {
         int row = position.row();
         int col = position.col();
@@ -127,12 +201,21 @@ public class BoardGameUIController {
         }
         return adjacentPositions;
     }
+    /**
+     * Checks if a position is valid within the board boundaries.
+     *
+     * @param position the position
+     * @return {@code true} if the position is valid, {@code false} otherwise
+     */
     private boolean isValidPosition(Position position) {
         int row = position.row();
         int col = position.col();
         return row >= 0 && row < BoardGame.BOARD_HEIGHT && col >= 0 && col < BoardGame.BOARD_WIDTH;
     }
-
+    /**
+     * Handles the game over scenario.
+     * It displays an alert with the winner and their position.
+     */
     private void handleGameOver() {
         State loser = model.getCurrentPlayer();
         State winner = (loser == State.BLACK) ? State.WHITE : State.BLACK;
