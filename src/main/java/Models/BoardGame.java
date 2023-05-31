@@ -28,7 +28,11 @@ public class BoardGame {
     public void setCell(Position pos, Cell cellType){
         board[pos.row()][pos.col()] = cellType;
     }
-
+    public State getCurrentPlayer(){
+        return player;
+    }
+    public Position getWhiteKing(){return whiteKing;}
+    public Position getBlackKing(){return blackKing;}
     public void move(Position to){
         Position from = getCurrentPlayerPosition();
         if(legalStep(from, to)){
@@ -38,9 +42,14 @@ public class BoardGame {
             switchTurn();
         }
     }
+    public Position getCurrentPlayerPosition() {
+        return (getCurrentPlayer() == State.WHITE) ? whiteKing : blackKing;
+    }
     private void movePlayer(Position to){
-        if (player == State.WHITE) whiteKing = to;
-        else blackKing = to;
+        switch (getCurrentPlayer()){
+            case WHITE -> whiteKing = to;
+            case BLACK -> blackKing = to;
+        }
     }
     /**
      * Switching the turn of players. ex: Black moved, then the current player will be white.
@@ -51,24 +60,25 @@ public class BoardGame {
             case WHITE -> player = State.BLACK;
         }
     }
-    private Position getCurrentPlayerPosition() {
-        return (player == State.BLACK) ? blackKing : whiteKing;
-    }
-    /**
-     * Checking if the step is correct.
-     * @param to The position where the piece wants to move.
-     * @return True if the step is legal, False if step is not legal.
-     */
 
+    /**
+     * Checking if the step is correct. Instead of checking if the "to" cell is in REMOVED or KING state,
+     * we examine whether the cell is in UNEXPLORED state.
+     * @param to The position of the King piece.
+     * @param to The position where the piece wants to move.
+     * @return True if the "to" cell is in UNEXPLORED state and if it's a legal king move, else False.
+     */
     private boolean legalStep(Position from, Position to){
-        return !isCellRemoved(to) && isKingMove(from,to);
+        return isCellUnexplored(to) && isKingMove(from,to);
     }
-    private boolean isCellRemoved(Position p){return getCell(p) == Cell.REMOVED;}
+
+    private boolean isCellUnexplored(Position p){return getCell(p) == Cell.UNVISITED;}
     private boolean isKingMove(Position from, Position to){
         var dx = Math.abs(to.row() - from.row());
         var dy = Math.abs(to.col() - from.col());
         return dx + dy == 1 || dx * dy == 1;
     }
+
     @Override
     public String toString() {
         var sb = new StringBuilder();

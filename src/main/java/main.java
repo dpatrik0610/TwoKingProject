@@ -1,7 +1,8 @@
-import Controllers.BoardGameController;
+import Controllers.BoardGameConsoleController;
 
 public class main {
     public static void main(String[] args) {
-        BoardGameController boardGame = new BoardGameController();
+        BoardGameConsoleController boardGame = new BoardGameConsoleController();
+        boardGame.playGame();
     }
 }
