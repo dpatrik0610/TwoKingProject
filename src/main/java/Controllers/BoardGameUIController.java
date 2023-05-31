@@ -4,29 +4,23 @@ import Models.BoardGame;
 import Models.Cell;
 import Models.Position;
 import Models.State;
-import javafx.beans.binding.ObjectBinding;
-import javafx.beans.property.ReadOnlyObjectProperty;
+
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
-import javafx.scene.control.Label;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static Models.Cell.*;
+
 public class BoardGameUIController {
     @FXML
     private GridPane board;
-    @FXML
-    private Label currentPlayerLabel;
+
     private BoardGame model = new BoardGame();
     @FXML
     private void initialize() {
@@ -36,43 +30,77 @@ public class BoardGameUIController {
                 board.add(square, j, i);
             }
         }
-
+        colorCircles();
     }
     private StackPane createSquare(int i, int j) {
-        var square = new StackPane();
-        square.getStyleClass().add("square");
-        var piece = new Circle(40);
-        colorCircles(piece, i, j);
-        square.getChildren().add(piece);
-        // TODO square.setOnMouseClicked(this::handleMouseClick);
+        StackPane square = new StackPane();
+        square.getStyleClass().addAll("square", "unvisited");
+        Circle circle = createCircle();
+        square.getChildren().add(circle);
+        square.setOnMouseClicked(this::handleMouseClick);
         return square;
     }
-    private void colorCircles(Circle circle, int i, int j){
-        if(new Position(i, j).equals(model.getWhiteKing())){
-            circle.getStyleClass().add("blackKing");
-        } else if(new Position(i, j).equals(model.getBlackKing())){
-            circle.getStyleClass().add("whiteKing");
-        } else {
-            circle.getStyleClass().add("transparentCircle");
-        }
+
+    private Circle createCircle() {
+        Circle circle = new Circle(40);
+        circle.getStyleClass().add("transparentCircle");
+        return circle;
     }
-    /*
-    TODO
+
+    private StackPane getSquare(Position position) {
+        for (var child : board.getChildren()) {
+            if (GridPane.getRowIndex(child) == position.row() && GridPane.getColumnIndex(child) == position.col()) {
+                return (StackPane) child;
+            }
+        }
+        throw new AssertionError();
+    }
+    private Circle getCircleFromSquare(StackPane square) {
+        for (Node child : square.getChildren()) {
+            if (child instanceof Circle) {
+                return (Circle) child;
+            }
+        }
+        // Never happens
+        throw new AssertionError("Circle not found in the StackPane.");
+    }
+    private void colorCircles(){
+        Position whitePos = model.getWhiteKing();
+        Position blackPos = model.getBlackKing();
+        Circle whiteCircle = getCircleFromSquare(getSquare(whitePos));
+        Circle blackCircle = getCircleFromSquare(getSquare(blackPos));
+
+        whiteCircle.getStyleClass().remove("transparentCircle");
+        whiteCircle.getStyleClass().add("whiteKing");
+        blackCircle.getStyleClass().remove("transparentCircle");
+        blackCircle.getStyleClass().add("blackKing");
+    }
+
     @FXML
     private void handleMouseClick(MouseEvent event) {
-        var square = (StackPane) event.getSource();
-        var row = GridPane.getRowIndex(square);
-        var col = GridPane.getColumnIndex(square);
+        StackPane clickedCell = (StackPane) event.getSource();
+        var row = GridPane.getRowIndex(clickedCell);
+        var col = GridPane.getColumnIndex(clickedCell);
+        Position from = model.getCurrentPlayerPosition();
+        Position to = new Position(row, col);
 
-        Position newPos = new Position(row, col);
-        model.move(newPos);
+        if(model.legalStep(from, to)){
+            makeCellRemoved(getSquare(from));
+            model.move(to);
+            colorCircles();
+        }
         if (gameOver()) {
             handleGameOver();
-        } else {
-            currentPlayerLabel.setText("Current player: " + model.getCurrentPlayer());
         }
     }
-*/
+
+    private void makeCellRemoved(StackPane oldCell){
+        Circle circle = getCircleFromSquare(oldCell);
+
+        oldCell.getStyleClass().remove("unvisited");
+        oldCell.getStyleClass().add("removed");
+        oldCell.getChildren().remove(circle);
+    }
     private boolean gameOver() {
         return !hasLegalMoves(model.getCurrentPlayerPosition());
     }

@@ -1,10 +1,13 @@
-.square {
+.square.unvisited {
     -fx-border-style: solid;
     -fx-background-color: khaki;
 }
 
 .square:hover {
-    -fx-background-color: whitesmoke;
+    -fx-background-color: gray;
+}
+.square.removed{
+    -fx-background-color: transparent;
 }
 
 .blackKing{

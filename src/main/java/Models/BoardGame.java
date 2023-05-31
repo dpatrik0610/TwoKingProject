@@ -33,14 +33,16 @@ public class BoardGame {
     }
     public Position getWhiteKing(){return whiteKing;}
     public Position getBlackKing(){return blackKing;}
-    public void move(Position to){
+    public boolean move(Position to){
         Position from = getCurrentPlayerPosition();
         if(legalStep(from, to)){
             setCell(to, Cell.KING);
             setCell(from, Cell.REMOVED);
             movePlayer(to);
             switchTurn();
+            return true;
         }
+        return false;
     }
     public Position getCurrentPlayerPosition() {
         return (getCurrentPlayer() == State.WHITE) ? whiteKing : blackKing;
@@ -68,7 +70,7 @@ public class BoardGame {
      * @param to The position where the piece wants to move.
      * @return True if the "to" cell is in UNEXPLORED state and if it's a legal king move, else False.
      */
-    private boolean legalStep(Position from, Position to){
+    public boolean legalStep(Position from, Position to){
         return isCellUnexplored(to) && isKingMove(from,to);
     }
 
