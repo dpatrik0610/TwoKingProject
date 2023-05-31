@@ -1,0 +1,20 @@
+.square {
+    -fx-border-style: solid;
+    -fx-background-color: khaki;
+}
+
+.square:hover {
+    -fx-background-color: whitesmoke;
+}
+
+.blackKing{
+    -fx-fill: black;
+}
+.whiteKing{
+    -fx-fill: white;
+    -fx-stroke: black;
+    -fx-stroke-width: 1;
+}
+.transparentCircle{
+    -fx-fill: transparent;
+}
