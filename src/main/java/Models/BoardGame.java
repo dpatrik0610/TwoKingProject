@@ -63,5 +63,4 @@ public class BoardGame {
         var dy = Math.abs(to.getCol() - from.getCol());
         return dx + dy == 1 || dx * dy == 1;
     }
-
 }
