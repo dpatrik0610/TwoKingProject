@@ -130,7 +130,7 @@ public class BoardGameUIController {
         Position to = getCellPositionAtMouse(event);
         logger.info("Mouse click on cell {}", to);
         if(model.legalStep(from, to)){
-            makeCellRemoved(getSquare(from));
+            removeOldCell(getSquare(from));
             model.move(to);
             paintKingCircles();
         }
@@ -154,13 +154,12 @@ public class BoardGameUIController {
      * Changes to .removed class on the previous {@link StackPane} cell. and deletes its {@link Circle} children.
      * @param oldCell StackPane of the previous cell.
      */
-    private void makeCellRemoved(StackPane oldCell){
+    private void removeOldCell(StackPane oldCell){
         Circle circle = getCircleFromSquare(oldCell);
 
         oldCell.getStyleClass().remove("unvisited");
         oldCell.getStyleClass().add("removed");
         oldCell.getChildren().remove(circle);
-
     }
 
     /**
