@@ -47,14 +47,20 @@ public class BoardGame {
     public Position getCurrentPlayerPosition() {
         return (getCurrentPlayer() == State.WHITE) ? whiteKing : blackKing;
     }
+    /**
+     * Move the player to the specified position.
+     * @param to The position to move the player to.
+     */
     private void movePlayer(Position to){
         switch (getCurrentPlayer()){
             case WHITE -> whiteKing = to;
             case BLACK -> blackKing = to;
         }
     }
+
     /**
-     * Switching the turn of players. ex: Black moved, then the current player will be white.
+     * Switch the turn of players. For example, if the current player is BLACK,
+     * switchTurn will set the current player to WHITE.
      */
     private void switchTurn(){
         switch (player){
@@ -64,17 +70,32 @@ public class BoardGame {
     }
 
     /**
-     * Checking if the step is correct. Instead of checking if the "to" cell is in REMOVED or KING state,
-     * we examine whether the cell is in UNEXPLORED state.
-     * @param to The position of the King piece.
-     * @param to The position where the piece wants to move.
-     * @return True if the "to" cell is in UNEXPLORED state and if it's a legal king move, else False.
+     * Check if the step is legal. The step is considered legal if the "to" cell is in the UNEXPLORED {@link State}
+     * and if it's a legal king move.
+     *
+     * @param from The position of the current player.
+     * @param to   The position where the player wants to move.
+     * @return True if the step is legal, False otherwise.
      */
     public boolean legalStep(Position from, Position to){
         return isCellUnexplored(to) && isKingMove(from,to);
     }
 
+    /**
+     * Check if the specified cell is in the UNEXPLORED state.
+     *
+     * @param p The position of the cell to check.
+     * @return True if the cell is in the UNEXPLORED state, False otherwise.
+     */
     private boolean isCellUnexplored(Position p){return getCell(p) == Cell.UNVISITED;}
+
+    /**
+     * Check if the move from the specified position to the specified position is a legal king move.
+     *
+     * @param from The starting position.
+     * @param to   The destination position.
+     * @return True if the move is a legal king move, False otherwise.
+     */
     private boolean isKingMove(Position from, Position to){
         var dx = Math.abs(to.row() - from.row());
         var dy = Math.abs(to.col() - from.col());

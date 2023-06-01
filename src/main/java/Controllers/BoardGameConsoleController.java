@@ -50,10 +50,10 @@ public class BoardGameConsoleController {
     }
 
     /**
-     * Iterate over a 3x3 grid centered around the given position.
+     * Iterate over a 3x3 grid centered around the given {@link Position}.
      * Check if each grid position is within the bounds of the board and exclude the current position itself.
      * @param position of a cell.
-     * @return Array containing adjacent Positions
+     * @return List containing adjacent Positions
      */
     private List<Position> getAdjacentPositions(Position position) {
         int row = position.row();
